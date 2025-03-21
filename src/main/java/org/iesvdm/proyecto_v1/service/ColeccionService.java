@@ -4,7 +4,6 @@ import org.iesvdm.proyecto_v1.model.Coleccion;
 import org.iesvdm.proyecto_v1.repository.ColeccionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -24,7 +23,7 @@ public class ColeccionService {
                 .orElseThrow(() -> new RuntimeException("Coleccion no encontrada"));
     }
 
-    // Obtener todos las colecciones
+    // Obtener todas las colecciones
     public List<Coleccion> obtenerTodasLasColecciones() {
         return coleccionRepository.findAll();
     }

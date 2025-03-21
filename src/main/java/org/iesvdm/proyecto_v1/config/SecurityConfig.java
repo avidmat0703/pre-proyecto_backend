@@ -1,6 +1,5 @@
 package org.iesvdm.proyecto_v1.config;
 
-// import org.iesvdm.proyecto_v1.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,9 +13,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-   // @Autowired
-   // private CustomUserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -36,12 +32,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-/*    // Usar nuestros usuarios de base de datos
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return userDetailsService; // Usar el servicio que carga los usuarios desde la base de datos
-    } */
 
      // Crear usuarios en el Security si no tenemos implementado usuarios en la base de datos
   @Bean

@@ -27,7 +27,6 @@ public class Libro {
     private Set<Reseña> reseñas = new HashSet<>(); // Conjunto de reseñas asociadas al libro
 
     // Getters y Setters
-
     public Long getId() {
         return id;
     }
