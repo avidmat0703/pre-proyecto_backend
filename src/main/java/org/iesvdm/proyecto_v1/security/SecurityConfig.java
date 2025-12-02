@@ -1,6 +1,5 @@
-package org.iesvdm.proyecto_v1.config;
+package org.iesvdm.proyecto_v1.security;
 
-import org.iesvdm.proyecto_v1.filter.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

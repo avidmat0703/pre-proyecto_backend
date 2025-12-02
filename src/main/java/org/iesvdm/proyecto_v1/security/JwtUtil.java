@@ -1,4 +1,4 @@
-package org.iesvdm.proyecto_v1.util;
+package org.iesvdm.proyecto_v1.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

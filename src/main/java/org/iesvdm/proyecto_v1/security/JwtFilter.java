@@ -1,4 +1,4 @@
-package org.iesvdm.proyecto_v1.filter;
+package org.iesvdm.proyecto_v1.security;
 
 import org.iesvdm.proyecto_v1.service.UsuarioService;
 import org.iesvdm.proyecto_v1.util.JwtUtil;
