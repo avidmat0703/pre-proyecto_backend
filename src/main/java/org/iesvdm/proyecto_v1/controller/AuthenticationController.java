@@ -2,7 +2,7 @@ package org.iesvdm.proyecto_v1.controller;
 
 import org.iesvdm.proyecto_v1.model.Usuario;
 import org.iesvdm.proyecto_v1.service.UsuarioService;
-import org.iesvdm.proyecto_v1.util.JwtUtil;
+import org.iesvdm.proyecto_v1.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

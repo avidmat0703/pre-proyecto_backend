@@ -1,7 +1,6 @@
 package org.iesvdm.proyecto_v1.security;
 
 import org.iesvdm.proyecto_v1.service.UsuarioService;
-import org.iesvdm.proyecto_v1.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
