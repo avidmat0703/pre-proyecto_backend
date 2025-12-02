@@ -3,11 +3,13 @@ package org.iesvdm.proyecto_v1.service;
 import org.iesvdm.proyecto_v1.model.Usuario;
 import org.iesvdm.proyecto_v1.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class UsuarioService {
+public class UsuarioService implements UserDetailsService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -41,5 +43,17 @@ public class UsuarioService {
     // Eliminar un usuario
     public void eliminarUsuario(Long id) {
         usuarioRepository.deleteById(id);
+    }
+
+    // Método para JWT (buscar usuario por email)
+    public Usuario obtenerUsuarioPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
+    }
+
+    // Método requerido por UserDetailsService para Spring Security
+    @Override
+    public Usuario loadUserByUsername(String email) throws UsernameNotFoundException {
+        return obtenerUsuarioPorEmail(email);
     }
 }

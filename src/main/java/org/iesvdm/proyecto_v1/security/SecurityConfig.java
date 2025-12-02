@@ -1,0 +1,54 @@
+package org.iesvdm.proyecto_v1.config;
+
+import org.iesvdm.proyecto_v1.filter.JwtFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
+@Configuration
+public class SecurityConfig {
+
+    @Autowired
+    private JwtFilter jwtFilter;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/v1/api/auth/**").permitAll()
+                        .requestMatchers("/v1/api/autores/**").hasRole("ADMIN")
+                        .requestMatchers("/v1/api/reseñas/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/v1/api/libros/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/v1/api/colecciones/**").hasAnyRole("USER", "ADMIN")
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                );
+
+        // Añadir filtro JWT antes del filtro de autenticación por defecto
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+}

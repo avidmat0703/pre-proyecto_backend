@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,95 +21,68 @@ public class LibroController {
     @Autowired
     private AutorService autorService;
 
-    // Crear un nuevo libro
+    // Crear un nuevo libro → Solo ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Libro> crearLibro(@RequestBody Libro libro, @RequestParam Long autorId) {
-        // Buscar el autor por ID
-        Autor autor = autorService.obtenerAutorPorId(autorId); // Obtener el autor usando el ID proporcionado
+        Autor autor = autorService.obtenerAutorPorId(autorId);
+        if (autor == null) return ResponseEntity.badRequest().build();
 
-        if (autor == null) {
-            return ResponseEntity.badRequest().build(); // Si no se encuentra el autor, devolver error 400
-        }
-
-        // Asignar el autor al libro
         libro.setAutor(autor);
-
-        // Guardar el libro
         Libro libroGuardado = libroService.guardarLibro(libro);
-        return ResponseEntity.ok(libroGuardado); // Retornar el libro guardado
+        return ResponseEntity.ok(libroGuardado);
     }
 
-    // Obtener todos los libros paginados
+    // Obtener todos los libros paginados → TODOS
     @GetMapping
     public ResponseEntity<Page<Libro>> obtenerLibros(Pageable pageable) {
         Page<Libro> libros = libroService.obtenerLibrosPaginados(pageable);
         return ResponseEntity.ok(libros);
     }
 
-    // Buscar libros por título (con paginación)
+    // Buscar libros por título (paginación) → TODOS
     @GetMapping("/buscar")
     public ResponseEntity<Page<Libro>> buscarLibrosPorTitulo(@RequestParam String titulo, Pageable pageable) {
         Page<Libro> libros = libroService.buscarPorTitulo(titulo, pageable);
         return ResponseEntity.ok(libros);
     }
 
-    // Obtener un libro por su ID
+    // Obtener un libro por ID → TODOS
     @GetMapping("/{id}")
     public ResponseEntity<Libro> obtenerLibroPorId(@PathVariable Long id) {
         Libro libro = libroService.obtenerLibroPorId(id);
-
-        if (libro == null) {
-            return ResponseEntity.notFound().build(); // Si no existe, devuelve 404
-        }
-
-        return ResponseEntity.ok(libro); // Devuelve el libro encontrado
+        if (libro == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(libro);
     }
 
-    // Modificar libro
+    // Modificar libro → Solo ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Libro> modificarLibro(@PathVariable Long id,
                                                 @RequestBody Libro libro,
                                                 @RequestParam Long autorId) {
-        // Buscar el libro por ID
         Libro libroExistente = libroService.obtenerLibroPorId(id);
-        if (libroExistente == null) {
-            return ResponseEntity.notFound().build(); // Retorna 404 si no existe el libro
-        }
+        if (libroExistente == null) return ResponseEntity.notFound().build();
 
-        // Buscar el autor por ID
         Autor autor = autorService.obtenerAutorPorId(autorId);
-        if (autor == null) {
-            return ResponseEntity.badRequest().build(); // Retorna 400 si el autor no existe
-        }
+        if (autor == null) return ResponseEntity.badRequest().build();
 
-        // Actualizar solo los campos necesarios
-        if (libro.getTitulo() != null) {
-            libroExistente.setTitulo(libro.getTitulo());
-        }
-        if (libro.getDescripcion() != null) {
-            libroExistente.setDescripcion(libro.getDescripcion());
-        }
+        if (libro.getTitulo() != null) libroExistente.setTitulo(libro.getTitulo());
+        if (libro.getDescripcion() != null) libroExistente.setDescripcion(libro.getDescripcion());
 
-        // Establecer el nuevo autor
         libroExistente.setAutor(autor);
-
-        // Guardar el libro actualizado
         Libro libroModificado = libroService.guardarLibro(libroExistente);
         return ResponseEntity.ok(libroModificado);
     }
 
-    // Eliminar libro
+    // Eliminar libro → Solo ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarLibro(@PathVariable Long id) {
-        // Verificar si el libro existe
         Libro libroExistente = libroService.obtenerLibroPorId(id);
+        if (libroExistente == null) return ResponseEntity.notFound().build();
 
-        if (libroExistente == null) {
-            return ResponseEntity.notFound().build(); // Si no existe el libro, devolver error 404
-        }
-
-        // Eliminar el libro
         libroService.eliminarLibro(id);
-        return ResponseEntity.noContent().build(); // Retornar código 204 (sin contenido)
+        return ResponseEntity.noContent().build();
     }
 }

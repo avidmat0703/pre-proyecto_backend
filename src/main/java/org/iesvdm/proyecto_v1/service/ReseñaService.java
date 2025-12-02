@@ -1,9 +1,11 @@
 package org.iesvdm.proyecto_v1.service;
 
+import org.iesvdm.proyecto_v1.exception.ReseñaNotFoundException;
 import org.iesvdm.proyecto_v1.model.Reseña;
 import org.iesvdm.proyecto_v1.repository.ReseñaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -12,35 +14,39 @@ public class ReseñaService {
     @Autowired
     private ReseñaRepository reseñaRepository;
 
-    // Obtener todas las reseña
     public List<Reseña> obtenerTodasLasReseñas() {
         return reseñaRepository.findAll();
     }
 
-    // Obtener una reseña por ID
     public Reseña obtenerReseñaPorId(Long id) {
         return reseñaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reseña no encontrada"));
+                .orElseThrow(() -> new ReseñaNotFoundException(id));
     }
 
-    // Crear una reseña
     public Reseña crearReseña(Reseña reseña) {
+        validarReseña(reseña);
         return reseñaRepository.save(reseña);
     }
 
-    // Modificar una reseña
     public Reseña modificarReseña(Long id, Reseña reseña) {
-        Reseña reseñaExistente = reseñaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reseña no encontrada"));
-        reseñaExistente.setComentario(reseña.getComentario());
-        reseñaExistente.setCalificacion(reseña.getCalificacion());
-        return reseñaRepository.save(reseñaExistente);
+        Reseña existente = obtenerReseñaPorId(id);
+        validarReseña(reseña);
+        existente.setComentario(reseña.getComentario());
+        existente.setCalificacion(reseña.getCalificacion());
+        return reseñaRepository.save(existente);
     }
 
-    // Eliminar una reseña
     public void eliminarReseña(Long id) {
-        Reseña reseña = reseñaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reseña no encontrada"));
+        Reseña reseña = obtenerReseñaPorId(id);
         reseñaRepository.delete(reseña);
+    }
+
+    private void validarReseña(Reseña reseña) {
+        if (reseña.getComentario() == null || reseña.getComentario().isBlank()) {
+            throw new IllegalArgumentException("El comentario es obligatorio");
+        }
+        if (reseña.getCalificacion() < 1 || reseña.getCalificacion() > 5) {
+            throw new IllegalArgumentException("La calificación debe estar entre 1 y 5");
+        }
     }
 }
