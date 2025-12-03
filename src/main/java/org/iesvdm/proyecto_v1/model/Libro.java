@@ -1,6 +1,7 @@
 package org.iesvdm.proyecto_v1.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,17 +17,23 @@ public class Libro {
     private String descripcion;
     private String isbn;
 
-    // Relación con el autor: un libro tiene un solo autor, pero un autor puede tener muchos libros
+    // Relación con el autor
     @ManyToOne
-    @JoinColumn(name = "autor_id", nullable = false) // La columna 'autor_id' en la tabla 'Libro' referencia a la tabla 'Autor'
-    private Autor autor; // Relación con la clase Autor
+    @JoinColumn(name = "autor_id", nullable = false)
+    private Autor autor;
 
-    // Relación con las reseñas: un libro puede tener muchas reseñas
+    // Relación con las reseñas
     @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("l_r") // Para evitar la recursión infinita en la serialización JSON
-    private Set<Reseña> reseñas = new HashSet<>(); // Conjunto de reseñas asociadas al libro
+    @JsonManagedReference("l_r")
+    private Set<Reseña> reseñas = new HashSet<>();
+
+    // RELACIÓN CON COLECCIONES (faltaba)
+    @ManyToMany(mappedBy = "libros")
+    @JsonBackReference("c_l") // evita recursión infinita
+    private Set<Coleccion> colecciones = new HashSet<>();
 
     // Getters y Setters
+
     public Long getId() {
         return id;
     }
@@ -64,7 +71,7 @@ public class Libro {
     }
 
     public void setAutor(Autor autor) {
-        this.autor = autor; // Establece el autor para este libro
+        this.autor = autor;
     }
 
     public Set<Reseña> getReseñas() {
@@ -73,5 +80,13 @@ public class Libro {
 
     public void setReseñas(Set<Reseña> reseñas) {
         this.reseñas = reseñas;
+    }
+
+    public Set<Coleccion> getColecciones() {
+        return colecciones;
+    }
+
+    public void setColecciones(Set<Coleccion> colecciones) {
+        this.colecciones = colecciones;
     }
 }

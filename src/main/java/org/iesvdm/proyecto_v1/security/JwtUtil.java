@@ -13,7 +13,7 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "miClaveSecretaMuySegura123"; // Cambia esto por algo seguro
+    private static final String SECRET_KEY = "A9d82JkL0pqZsJ3871nxMZqP0LfT92mdKxB1C8rP5WfE6GsJrT3H9Q0L2V7B8N4";
 
     // Generar token a partir de email y rol
     public String generarToken(String email, String rol) {

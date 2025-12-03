@@ -24,13 +24,15 @@ public class LibroController {
     // Crear un nuevo libro → Solo ADMIN
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<Libro> crearLibro(@RequestBody Libro libro, @RequestParam Long autorId) {
+    public ResponseEntity<Libro> crearLibro(@RequestBody Libro libro) {
+        // Obtener el autor desde la base de datos usando el id que viene en el libro
+        Long autorId = libro.getAutor().getId();
         Autor autor = autorService.obtenerAutorPorId(autorId);
-        if (autor == null) return ResponseEntity.badRequest().build();
 
-        libro.setAutor(autor);
-        Libro libroGuardado = libroService.guardarLibro(libro);
-        return ResponseEntity.ok(libroGuardado);
+        libro.setAutor(autor); // asignar el autor correctamente
+        Libro creado = libroService.guardarLibro(libro);
+
+        return ResponseEntity.ok(creado);
     }
 
     // Obtener todos los libros paginados → TODOS

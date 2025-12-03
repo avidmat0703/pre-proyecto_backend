@@ -1,13 +1,13 @@
 package org.iesvdm.proyecto_v1.controller;
 
 import org.iesvdm.proyecto_v1.model.Usuario;
+import org.iesvdm.proyecto_v1.security.AuthenticationRequest;
 import org.iesvdm.proyecto_v1.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -17,6 +17,19 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+    // LOGIN (PÚBLICO)
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest request) {
+        return usuarioService.login(request);
+    }
+
+    // REGISTRO (PÚBLICO)
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Usuario usuario) {
+        return usuarioService.register(usuario);
+    }
+
+    // ENDPOINTS PROTEGIDOS
     // Obtener todos los usuarios → Solo ADMIN
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping

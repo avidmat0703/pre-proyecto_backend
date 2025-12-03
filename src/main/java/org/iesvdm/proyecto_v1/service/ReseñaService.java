@@ -5,7 +5,6 @@ import org.iesvdm.proyecto_v1.model.Reseña;
 import org.iesvdm.proyecto_v1.repository.ReseñaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service

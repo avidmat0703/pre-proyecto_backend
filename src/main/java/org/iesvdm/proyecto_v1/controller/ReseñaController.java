@@ -1,7 +1,9 @@
 package org.iesvdm.proyecto_v1.controller;
 
+import org.iesvdm.proyecto_v1.model.Libro;
 import org.iesvdm.proyecto_v1.model.Reseña;
 import org.iesvdm.proyecto_v1.model.Usuario;
+import org.iesvdm.proyecto_v1.service.LibroService;
 import org.iesvdm.proyecto_v1.service.ReseñaService;
 import org.iesvdm.proyecto_v1.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,64 +24,93 @@ public class ReseñaController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Autowired
+    private LibroService libroService;
+
     // Obtener todas las reseñas → TODOS
     @GetMapping
     public ResponseEntity<List<Reseña>> obtenerTodasLasReseñas() {
-        List<Reseña> resenas = reseñaService.obtenerTodasLasReseñas();
-        return ResponseEntity.ok(resenas);
+        return ResponseEntity.ok(reseñaService.obtenerTodasLasReseñas());
     }
 
     // Obtener una reseña por ID → TODOS
     @GetMapping("/{id}")
     public ResponseEntity<Reseña> obtenerReseñaPorId(@PathVariable Long id) {
         Reseña reseña = reseñaService.obtenerReseñaPorId(id);
-        if (reseña == null) return ResponseEntity.notFound().build();
+        if (reseña == null)
+            return ResponseEntity.notFound().build();
+
         return ResponseEntity.ok(reseña);
     }
 
-    // Crear una reseña → USUARIO o ADMIN
+    // Crear una reseña → USER o ADMIN
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Reseña> crearReseña(@RequestBody Reseña reseña, Authentication auth) {
+
+        // Obtener el usuario autenticado
         String email = auth.getName();
         Usuario usuario = usuarioService.obtenerUsuarioPorEmail(email);
         reseña.setUsuario(usuario);
-        Reseña nuevaReseña = reseñaService.crearReseña(reseña);
-        return ResponseEntity.ok(nuevaReseña);
+
+        // VALIDAR QUE EL LIBRO EXISTE
+        Long libroId = reseña.getLibro().getId();
+        Libro libro = libroService.obtenerLibroPorId(libroId);
+        if (libro == null) {
+            return ResponseEntity.badRequest().build(); // 400 Bad Request
+        }
+        reseña.setLibro(libro); // asigna entidad válida y gestionada por JPA
+
+        // Guardar la reseña
+        Reseña nueva = reseñaService.crearReseña(reseña);
+        return ResponseEntity.ok(nueva);
     }
 
-    // Modificar una reseña → USUARIO (propia) o ADMIN
+    // Modificar reseña → USER dueño o ADMIN
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<Reseña> modificarReseña(@PathVariable Long id, @RequestBody Reseña reseña, Authentication auth) {
+    public ResponseEntity<Reseña> modificarReseña(
+            @PathVariable Long id,
+            @RequestBody Reseña reseña,
+            Authentication auth) {
+
         Reseña existente = reseñaService.obtenerReseñaPorId(id);
-        if (existente == null) return ResponseEntity.notFound().build();
+        if (existente == null)
+            return ResponseEntity.notFound().build();
 
         String email = auth.getName();
         Usuario usuario = usuarioService.obtenerUsuarioPorEmail(email);
 
-        if (!usuario.getRol().equals("ADMIN") && !existente.getUsuario().getId().equals(usuario.getId())) {
-            return ResponseEntity.status(403).build(); // Forbidden si no es admin ni dueño
+        // Permitido solo si es ADMIN o dueño de la reseña
+        if (!usuario.getRol().equals("ADMIN")
+                && !existente.getUsuario().getId().equals(usuario.getId())) {
+            return ResponseEntity.status(403).build();
         }
 
+        // Actualizar datos
         existente.setComentario(reseña.getComentario());
         existente.setCalificacion(reseña.getCalificacion());
+
         Reseña modificada = reseñaService.modificarReseña(id, existente);
         return ResponseEntity.ok(modificada);
     }
 
-    // Eliminar una reseña → USUARIO (propia) o ADMIN
+    // Eliminar reseña → USER dueño o ADMIN
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarReseña(@PathVariable Long id, Authentication auth) {
+
         Reseña existente = reseñaService.obtenerReseñaPorId(id);
-        if (existente == null) return ResponseEntity.notFound().build();
+        if (existente == null)
+            return ResponseEntity.notFound().build();
 
         String email = auth.getName();
         Usuario usuario = usuarioService.obtenerUsuarioPorEmail(email);
 
-        if (!usuario.getRol().equals("ADMIN") && !existente.getUsuario().getId().equals(usuario.getId())) {
-            return ResponseEntity.status(403).build(); // Forbidden si no es admin ni dueño
+        // Permitido solo si es ADMIN o dueño
+        if (!usuario.getRol().equals("ADMIN")
+                && !existente.getUsuario().getId().equals(usuario.getId())) {
+            return ResponseEntity.status(403).build();
         }
 
         reseñaService.eliminarReseña(id);

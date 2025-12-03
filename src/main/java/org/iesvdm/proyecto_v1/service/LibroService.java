@@ -1,6 +1,8 @@
 package org.iesvdm.proyecto_v1.service;
 
+import jakarta.transaction.Transactional;
 import org.iesvdm.proyecto_v1.exception.LibroNotFoundException;
+import org.iesvdm.proyecto_v1.model.Coleccion;
 import org.iesvdm.proyecto_v1.model.Libro;
 import org.iesvdm.proyecto_v1.repository.LibroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +34,16 @@ public class LibroService {
                 .orElseThrow(() -> new LibroNotFoundException(id));
     }
 
+    @Transactional
     public void eliminarLibro(Long id) {
         Libro libro = obtenerLibroPorId(id);
+
+        // Quitar el libro de todas las colecciones antes de borrarlo
+        for (Coleccion coleccion : libro.getColecciones()) {
+            coleccion.getLibros().remove(libro);
+        }
+
+        // Ahora se puede eliminar sin romper FK
         libroRepository.delete(libro);
     }
 
