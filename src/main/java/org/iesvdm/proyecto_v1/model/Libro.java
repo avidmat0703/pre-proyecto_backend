@@ -16,6 +16,7 @@ public class Libro {
     private String titulo;
     private String descripcion;
     private String isbn;
+    private String imagenUrl;
 
     // Relación con el autor
     @ManyToOne
@@ -64,6 +65,14 @@ public class Libro {
 
     public void setIsbn(String isbn) {
         this.isbn = isbn;
+    }
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
     }
 
     public Autor getAutor() {
